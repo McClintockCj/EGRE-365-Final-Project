@@ -12,7 +12,7 @@ entity ADT_FSM is
           SRST : out std_logic;
           STB : out std_logic;
           MSG : out std_logic;
-          A_In : out std_logic_vector(7 downto 0);
+          A_In : out std_logic_vector(7 downto 0) := b"00000000";
           D_In : out std_logic_vector(7 downto 0);
           Done : in std_logic;
           Err : in std_logic;
@@ -21,26 +21,45 @@ entity ADT_FSM is
 end entity;
 
 architecture Behavioral of ADT_FSM is
-Type States is (IDLE);
-Signal CurrState : std_logic;
-Signal NextState : std_logic;
+    
+    Type states is (idle, read_request, send_pulse1, save_MSB, send_pulse2, save_LSB);
+    signal current_state, next_state : states;
+
 begin
-
-Next_State_Logic : process(CurrState, Start, Reset) is
+    
+    state_register : process(clk)
     begin
-   
-end process Next_State_Logic;
-
-State_Register : process(Clk) is
+        if (reset = '1') then
+            current_state <= idle;
+        elsif rising_edge(clk) then
+            current_state <= next_state;
+        end if;
+    end process state_register;
+    
+    Next_State_Logic : process(current_state, start) is
     begin
-    if (Rising_Edge(clk)) then
-        CurrState <= NextState;
-    end if;
-end process State_Register;
+    
+        case current_state is
+            when idle =>
+                if rising_edge(start) then
+                    next_state <= read_request;
+                else
+                    next_state <= idle;
+                end if;
+            
+       
+       
+       
+        end case;
 
-Output_Logic : process(CurrState)
-    begin
-   
-end process Output_Logic;
-
+       
+    end process Next_State_Logic;
+    
+    
+    
+    Output_Logic : process(current_state)
+        begin
+       
+    end process Output_Logic;
+    
 end architecture behavioral;
